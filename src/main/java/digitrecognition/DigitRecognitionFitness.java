@@ -16,15 +16,18 @@ public class DigitRecognitionFitness implements Fitness {
     // if false, does test
     private final boolean training;
     private final double percentToDo;
+    private final boolean printWrong;
     private double[][] images;
     private double[] labels;
     private double[][] answers;
     private final String imagesPathString;
     private final String labelsPathString;
+    private final Utility util = Utility.getUtility();
 
-    public DigitRecognitionFitness(boolean training, double percentToDo, boolean onOffPixels) {
+    public DigitRecognitionFitness(boolean training, double percentToDo, boolean onOffPixels, boolean printWrong) {
         this.training = training;
         this.percentToDo = percentToDo;
+        this.printWrong = printWrong;
         if (training) {
             imagesPathString = "training/train-images.idx3-ubyte";
             labelsPathString = "training/train-labels.idx1-ubyte";
@@ -90,7 +93,7 @@ public class DigitRecognitionFitness implements Fitness {
     }
 
     public double convertByte(byte b) {
-        double r = 0;
+        double r = 0.0;
         if (b >= 0) {
             r = b;
         } else {
@@ -142,11 +145,43 @@ public class DigitRecognitionFitness implements Fitness {
         int guess;
         for (int i = 0; i < ((double) labels.length) * percentToDo; i++) {
             response = net.evaluate(images[i]);
-            guess = Utility.getUtility().maxIndex(response);
-            percent += guess == labels[i] ? 1.0 : 0.0;
+            guess = util.maxIndex(response);
+            if (guess == labels[i]) {
+                percent += 1.0;
+            } else if (printWrong) {
+                System.out.println("************");
+                printImage(images[i]);
+                System.out.println("Label = " + labels[i]);
+                printOutput(response);
+                System.out.println("Guess = " + guess);
+                System.out.println("");
+            }
         }
         percent = percent / (((double) labels.length) * percentToDo);
         return percent;
+    }
+
+    public void printOutput(double[] output) {
+        System.out.print("[");
+        for (int i = 0; i < 10; i++) {
+            System.out.print(" " + i + ":" + util.roundString(output[i]));
+        }
+        System.out.println("]");
+    }
+
+    public void printImage(double[] image) {
+        for (int i = 0; i < 28; i++) {
+            for (int j = 0; j < 28; j++) {
+                if (image[i*28 + j] == 0.0) {
+                    System.out.print(" ");
+                } else if (image[i*28 + j] < 0.7) {
+                    System.out.print("-");
+                } else {
+                    System.out.print("#");
+                }
+            }
+            System.out.println();
+        }
     }
 
     @Override
