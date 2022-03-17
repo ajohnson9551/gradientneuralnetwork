@@ -99,7 +99,7 @@ public class DigitRecognitionFitness implements Fitness {
         } else {
             r = ((double) b) + 256.0;
         }
-        return r / 256.0;
+        return (r / 256.0);
     }
 
     private void read(InputStream inputStream, byte data[])

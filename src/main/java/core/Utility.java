@@ -8,15 +8,15 @@ public class Utility {
     private static double[] sigmoidValues;
     private static double[] sigmoidPrimeValues;
     private static final int numApproximations = 1000000;
-    private static final int sigmoidApproxRange = 100;
-    private static final Random rand = new Random();
+    private static final int approxRange = 150;
+    private static final double approxIndexMult = ((double) numApproximations) / (2.0 * ((double) approxRange));
 
     private Utility() {
         sigmoidValues = new double[numApproximations];
         sigmoidPrimeValues = new double[numApproximations];
         for (int i = 0; i < numApproximations; i++) {
-            sigmoidValues[i] = sigmoid(2.0 * sigmoidApproxRange * (i - numApproximations/2.0) / numApproximations);
-            sigmoidPrimeValues[i] = sigmoidPrime(2.0 * sigmoidApproxRange * (i - numApproximations/2.0) / numApproximations);
+            sigmoidValues[i] = sigmoid(2.0 * approxRange * (i - numApproximations/2.0) / numApproximations);
+            sigmoidPrimeValues[i] = sigmoidPrime(2.0 * approxRange * (i - numApproximations/2.0) / numApproximations);
         }
     }
 
@@ -31,24 +31,10 @@ public class Utility {
         return utility;
     }
 
-    public double randVal(double range) {
-        return range * (2.0*rand.nextDouble() - 1.0);
-    }
-
     public String roundString(double x) {
         String r = x >= 0 ? " " : "";
         r += String.format("%.6f", x);
         return r;
-    }
-
-    public double tweakValue(double x, double range){
-        double y = x + randVal(range);
-//        if (y > 1) {
-//            return 1;
-//        } else if (y < -1) {
-//            return -1;
-//        }
-        return y;
     }
 
     public void sigmoid(double[] input) {
@@ -62,12 +48,12 @@ public class Utility {
     }
 
     public int indexOfApprox(double x) {
-        if (x < -1 * sigmoidApproxRange) {
+        if (x < -1 * approxRange) {
             return 0;
-        } else if (x > sigmoidApproxRange) {
+        } else if (x > approxRange) {
             return numApproximations - 1;
         } else {
-            return (int) (numApproximations * ((x + sigmoidApproxRange) / (2.0 * sigmoidApproxRange)));
+            return (int) (approxIndexMult * (x + approxRange));
         }
     }
 
@@ -82,6 +68,11 @@ public class Utility {
     public double dotProd(double[] a, double[] x) {
         double v = 0;
         for (int i = 0; i < a.length; i++) {
+            // in implementation, assume x is more likely to be 0
+            // so this should run slightly faster...
+            if (x[i] == 0) {
+                continue;
+            }
             v += a[i] * x[i];
         }
         return v;
@@ -90,8 +81,7 @@ public class Utility {
     public double[] evaluate(double[][] A, double[] b, double[] x, boolean doSigmoid) {
         double[] y = new double[A.length];
         for (int i = 0; i < A.length; i++) {
-            y[i] += dotProd(A[i], x);
-            y[i] += b[i];
+            y[i] += dotProd(A[i], x) + b[i];
         }
         if (doSigmoid) {
             sigmoid(y);
@@ -133,6 +123,14 @@ public class Utility {
         }
     }
 
+    public double mse(double[] guess, double[] correct) {
+        double e = 0;
+        for (int i = 0; i < guess.length; i++) {
+            e += (guess[i] - correct[i]) * (guess[i] - correct[i]);
+        }
+        return (e / ((double) guess.length));
+    }
+
     public double mse(double[] guess, int correct) {
         double e = 0;
         for (int i = 0; i < guess.length; i++) {
@@ -143,5 +141,14 @@ public class Utility {
             }
         }
         return (e / ((double) guess.length));
+    }
+
+    public String avgString(double[] a) {
+        double avg = 0;
+        for (double x : a) {
+            avg += x;
+        }
+        avg = avg / a.length;
+        return roundString(avg);
     }
 }
