@@ -1,8 +1,10 @@
 package core;
 
-public interface Network {
+import java.io.Serializable;
+
+public interface Network extends Serializable {
 
 	double[] evaluate(double[] x);
 	void serialize(String path);
-	void deserialize(String path);
+	Network deserialize(String path);
 }

@@ -42,9 +42,8 @@ public class Run {
 		// expAcc false
 		// 24522 seconds, 98.4% test (99.9% training)
 
-
 		int cycles = 120000;
-		double trainingRate = 400; // how well this works depends on values below...!
+		double trainingRate = 500; // how well this works depends on values below...!
 		boolean printWrong = true; // on test, print those it got wrong
 
 		double percentToDo = 0.01; // use 0.01 to test regular GD if not stochastic, this is handled below automatically

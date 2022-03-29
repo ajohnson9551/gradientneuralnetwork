@@ -1,9 +1,8 @@
 package core;
 
-import java.io.Serializable;
 import java.util.Random;
 
-public class LayeredNetworkParameters extends NetworkParameters implements Serializable {
+public class LayeredNetworkParameters extends NetworkParameters {
 
 	protected int[] hiddenLayerSizes;
 

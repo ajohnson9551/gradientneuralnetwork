@@ -1,18 +1,21 @@
 package core;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.Arrays;
 
-public class LayeredNetwork implements Network, Serializable {
+public class LayeredNetwork implements Network {
 
-	private LayeredNetworkParameters params;
-	private double[][][] weights;
-	private double[][] offsets;
+	private final LayeredNetworkParameters params;
+	private final double[][][] weights;
+	private final double[][] offsets;
 
-	private Utility util = Utility.getUtility();
+	private final transient Utility util = Utility.getUtility();
 
 	public LayeredNetwork(String path) {
-		this.deserialize(path);
+		LayeredNetwork net = (LayeredNetwork) this.deserialize(path);
+		this.params = net.params;
+		this.weights = net.weights;
+		this.offsets = net.offsets;
 	}
 
 	public LayeredNetwork(LayeredNetworkParameters params) {
@@ -71,11 +74,30 @@ public class LayeredNetwork implements Network, Serializable {
 
 	@Override
 	public void serialize(String path) {
-
+		try {
+			FileOutputStream fileOut = new FileOutputStream(path + "/network.ser");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(this);
+			out.close();
+			fileOut.close();
+		} catch (IOException i) {
+			i.printStackTrace();
+		}
 	}
 
 	@Override
-	public void deserialize(String path) {
-
+	public Network deserialize(String path) {
+		LayeredNetwork net;
+		try {
+			FileInputStream fileIn = new FileInputStream(path + "/network.ser");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			net = (LayeredNetwork) in.readObject();
+			in.close();
+			fileIn.close();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return net;
 	}
 }

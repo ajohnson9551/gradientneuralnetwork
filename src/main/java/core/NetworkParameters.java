@@ -1,6 +1,8 @@
 package core;
 
-public abstract class NetworkParameters {
+import java.io.Serializable;
+
+public abstract class NetworkParameters implements Serializable {
 
 	protected final int numInputs;
 	protected final int numOutputs;

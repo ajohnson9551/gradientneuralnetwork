@@ -50,7 +50,7 @@ public class BasicNetwork implements Network {
 	}
 
 	@Override
-	public void deserialize(String path) {
-
+	public Network deserialize(String path) {
+		return null;
 	}
 }
