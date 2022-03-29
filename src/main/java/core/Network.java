@@ -2,5 +2,7 @@ package core;
 
 public interface Network {
 
-    public abstract double[] evaluate(double[] x);
+	double[] evaluate(double[] x);
+	void serialize(String path);
+	void deserialize(String path);
 }
