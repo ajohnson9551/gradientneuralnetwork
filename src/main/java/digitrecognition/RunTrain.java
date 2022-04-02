@@ -16,8 +16,8 @@ public class RunTrain {
 
 		long t0 = System.currentTimeMillis();
 
-		int cycles = 1200;
-		double trainingRate = 100;
+		int cycles = 12000;
+		double trainingRate = 30;
 		int stochasticBatchSize = 10;
 		int ram = 10;
 

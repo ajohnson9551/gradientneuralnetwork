@@ -57,10 +57,10 @@ public class DigitDrawing extends JPanel implements MouseListener, KeyListener, 
 			increaseToMax(cellX - 1, cellY, 0.3);
 			increaseToMax(cellX, cellY + 1, 0.3);
 			increaseToMax(cellX, cellY - 1, 0.3);
-			increaseToMax(cellX + 1, cellY + 1, 0.1);
-			increaseToMax(cellX - 1, cellY + 1, 0.1);
-			increaseToMax(cellX + 1, cellY + 1, 0.1);
-			increaseToMax(cellX - 1, cellY - 1, 0.1);
+			increaseToMax(cellX + 1, cellY + 1, 0.2);
+			increaseToMax(cellX - 1, cellY + 1, 0.2);
+			increaseToMax(cellX + 1, cellY + 1, 0.2);
+			increaseToMax(cellX - 1, cellY - 1, 0.2);
 			this.repaint();
 		}
 		lastX = cellX;

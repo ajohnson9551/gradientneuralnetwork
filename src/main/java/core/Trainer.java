@@ -20,7 +20,7 @@ public class Trainer {
 	private final double[][] data;
 	private final double[][] answers;
 	private final double scaling;
-	private final int toDo;
+	private final int batchSize;
 
 	private final Random rand = new Random();
 
@@ -30,8 +30,8 @@ public class Trainer {
 		this.ram = ram;
 		this.data = trainFit.getData();
 		this.answers = trainFit.getAnswers();
-		this.toDo = (int) (data.length * percentToDo);
-		this.scaling = 2.0 / (toDo * net.param.numOutputs);
+		this.batchSize = batchSize;
+		this.scaling = 2.0 / (batchSize * net.param.numOutputs);
 		this.mses = new double[ram];
 	}
 
@@ -53,7 +53,7 @@ public class Trainer {
 	public void trainStep(ConvolutionalNetwork net) {
 		net.prepareGrads();
 
-		for (int k = 0; k < toDo; k++) {
+		for (int k = 0; k < batchSize; k++) {
 			int k1 = this.rand.nextInt(this.data.length);
 			double[] x = this.data[k1];
 			double[] ans = this.answers[k1];
