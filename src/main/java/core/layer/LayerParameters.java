@@ -22,7 +22,6 @@ public abstract class LayerParameters implements Serializable {
 	public final LayerType layerType;
 
 	public LayerParameters(int outputLength, ActFunc actFunc) {
-		assert outputLength > 0;
 		this.outputSize = new int[]{outputLength, 1, 1};
 		this.actFunc = actFunc;
 		this.poolSize = 0;
@@ -35,8 +34,6 @@ public abstract class LayerParameters implements Serializable {
 	}
 
 	public LayerParameters(int poolSize, int stride) {
-		assert stride > 0;
-		assert poolSize > 0;
 		this.actFunc = null;
 		this.poolSize = poolSize;
 		this.convRadius = 0;
@@ -48,8 +45,6 @@ public abstract class LayerParameters implements Serializable {
 	}
 
 	public LayerParameters(int convRadius, int numConvs, int pad, ActFunc actFunc) {
-		assert convRadius > 0;
-		assert numConvs > 0;
 		this.actFunc = actFunc;
 		this.poolSize = 0;
 		this.convRadius = convRadius;

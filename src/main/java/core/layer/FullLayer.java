@@ -34,9 +34,8 @@ public class FullLayer extends Layer {
 
 	@Override
 	public void assignGradientInto(Layer receiveGrad, int i, int j, int k, int batchIndex) {
-		assert lastX != null && lastPrime != null && receiveGrad instanceof FullLayer;
-		for (int ai = 0; ai < A.length; ai++) {
-			for (int aj = 0; aj < A[0].length; aj++) {
+		for (int ai = 0; ai < this.A.length; ai++) {
+			for (int aj = 0; aj < this.A[0].length; aj++) {
 				((FullLayer) receiveGrad).A[ai][aj] = ai == i ? this.lastPrime[batchIndex][i][j][k] * this.lastX[batchIndex][aj % this.lastX[batchIndex].length][(aj / this.lastX[batchIndex].length) % this.lastX[batchIndex][0].length][aj / (this.lastX[batchIndex].length * lastX[batchIndex][0].length)] : 0;
 			}
 			((FullLayer) receiveGrad).b[ai] = ai == i ? this.lastPrime[batchIndex][i][j][k] : 0;
@@ -45,7 +44,6 @@ public class FullLayer extends Layer {
 
 	@Override
 	public void combineScale(Layer addLayer, double scale) {
-		assert addLayer instanceof FullLayer;
 		for (int i = 0; i < A.length; i++) {
 			for (int j = 0; j < A[0].length; j++) {
 				this.A[i][j] += scale * ((FullLayer) addLayer).A[i][j];
@@ -111,7 +109,6 @@ public class FullLayer extends Layer {
 
 	@Override
 	public double[][][] getGradientX(int i, int j, int k, int batchIndex) {
-		assert this.lastX[batchIndex] != null && this.lastPrime[batchIndex] != null;
 		double[][][] gradX = new double[this.lastX[batchIndex].length][this.lastX[batchIndex][0].length][this.lastX[batchIndex][0][0].length];
 		for (int xk = 0; xk < this.lastX[batchIndex][0][0].length; xk++) {
 			for (int xj = 0; xj < this.lastX[batchIndex][0].length; xj++) {

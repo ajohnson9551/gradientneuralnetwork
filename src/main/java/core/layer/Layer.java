@@ -14,12 +14,12 @@ public abstract class Layer implements Serializable {
 	}
 
 	public boolean validateParameters() {
-		for (int a : layerParam.inputSize) {
+		for (int a : this.layerParam.inputSize) {
 			if (a < 1) {
 				return false;
 			}
 		}
-		for (int a : layerParam.outputSize) {
+		for (int a : this.layerParam.outputSize) {
 			if (a < 1) {
 				return false;
 			}
@@ -28,8 +28,8 @@ public abstract class Layer implements Serializable {
 	}
 
 	public void setupLasts(int batchSize) {
-		lastX = new double[batchSize][][][];
-		lastPrime = new double[batchSize][][][];
+		this.lastX = new double[batchSize][][][];
+		this.lastPrime = new double[batchSize][][][];
 	}
 
 	public abstract double[][][] evaluate(double[][][] x, int batchIndex);

@@ -14,12 +14,12 @@ public class PoolLayer extends Layer {
 
 	@Override
 	public double[][][] evaluate(double[][][] x, int batchIndex) {
-		double[][][] y = new double[layerParam.outputSize[0]][layerParam.outputSize[1]][layerParam.outputSize[2]];
+		double[][][] y = new double[this.layerParam.outputSize[0]][this.layerParam.outputSize[1]][this.layerParam.outputSize[2]];
 		int range = this.layerParam.poolSize;
 		int stride = this.layerParam.stride;
-		for (int k = 0; k < layerParam.outputSize[2]; k++) {
-			for (int j = 0; j < layerParam.outputSize[1]; j++) {
-				for (int i = 0; i < layerParam.outputSize[0]; i++) {
+		for (int k = 0; k < this.layerParam.outputSize[2]; k++) {
+			for (int j = 0; j < this.layerParam.outputSize[1]; j++) {
+				for (int i = 0; i < this.layerParam.outputSize[0]; i++) {
 					y[i][j][k] = maxInRange(x, i * stride, j * stride, k, range);
 				}
 			}
@@ -43,14 +43,13 @@ public class PoolLayer extends Layer {
 
 	@Override
 	public double[][][] getGradientX(int i, int j, int k, int batchIndex) {
-		assert this.lastX != null;
-		double[][][] gradX = new double[layerParam.inputSize[0]][layerParam.inputSize[1]][layerParam.inputSize[2]];
-		int xi = layerParam.stride * i;
-		int xj = layerParam.stride * j;
+		double[][][] gradX = new double[this.layerParam.inputSize[0]][this.layerParam.inputSize[1]][this.layerParam.inputSize[2]];
+		int xi = this.layerParam.stride * i;
+		int xj = this.layerParam.stride * j;
 		int[] coordsOfLargest = new int[]{xi, xj};
 		double max = this.lastX[batchIndex][xi][xj][k];
-		for (int xi1 = xi; xi1 < xi + layerParam.poolSize; xi1++) {
-			for (int xj1 = xj; xj1 < xj + layerParam.poolSize; xj1++) {
+		for (int xi1 = xi; xi1 < xi + this.layerParam.poolSize; xi1++) {
+			for (int xj1 = xj; xj1 < xj + this.layerParam.poolSize; xj1++) {
 				double m = Utility.getOrDefault(this.lastX[batchIndex], xi1, xj1, k, -Double.MAX_VALUE);
 				if (m > max) {
 					max = m;
@@ -66,7 +65,6 @@ public class PoolLayer extends Layer {
 
 	@Override
 	public int[][] getGradientXNonzeroRanges(int i, int j, int k) {
-		assert this.coordsOfLargest != null;
 		int[] iRange = new int[]{this.coordsOfLargest[0], this.coordsOfLargest[0]};
 		int[] jRange = new int[]{this.coordsOfLargest[1], this.coordsOfLargest[1]};
 		int[] kRange = new int[]{k, k};

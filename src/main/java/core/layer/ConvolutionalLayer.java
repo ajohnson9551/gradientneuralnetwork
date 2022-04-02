@@ -20,12 +20,12 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 	private void setupCs(boolean randomize) {
-		Cs = new double[2 * layerParam.convRadius - 1][2 * layerParam.convRadius - 1][layerParam.numConvs];
+		this.Cs = new double[2 * this.layerParam.convRadius - 1][2 * this.layerParam.convRadius - 1][this.layerParam.numConvs];
 		if (randomize) {
-			for (int n = 0; n < Cs[0][0].length; n++) {
-				for (int j = 0; j < Cs[0].length; j++) {
-					 for (int i = 0; i < Cs.length; i++) {
-						Cs[i][j][n] = Utility.randVal(0, 3);
+			for (int n = 0; n < this.Cs[0][0].length; n++) {
+				for (int j = 0; j < this.Cs[0].length; j++) {
+					 for (int i = 0; i < this.Cs.length; i++) {
+						 this.Cs[i][j][n] = Utility.randVal(0, 3);
 					}
 				}
 			}
@@ -66,7 +66,6 @@ public class ConvolutionalLayer extends Layer {
 
 	@Override
 	public double[][][] getGradientX(int i, int j, int k, int batchIndex) {
-		assert lastX[batchIndex] != null && this.lastPrime[batchIndex] != null;
 		double[][][] gradX = new double[lastX[batchIndex].length][lastX[batchIndex][0].length][lastX[batchIndex][0][0].length];
 		int r = this.layerParam.convRadius - 1;
 		int n = k % this.layerParam.numConvs;
@@ -101,7 +100,6 @@ public class ConvolutionalLayer extends Layer {
 
 	@Override
 	public void combineScale(Layer grad, double scale) {
-		assert grad instanceof ConvolutionalLayer;
 		for (int n = 0; n < this.layerParam.numConvs; n++) {
 			for (int cj = 0; cj < this.Cs[0].length; cj++) {
 				for (int ci = 0; ci < this.Cs.length; ci++) {
@@ -118,7 +116,6 @@ public class ConvolutionalLayer extends Layer {
 
 	@Override
 	public void assignGradientInto(Layer receiveGrad, int i, int j, int k, int batchIndex) {
-		assert lastX[batchIndex] != null && lastPrime[batchIndex] != null && receiveGrad instanceof ConvolutionalLayer;
 		receiveGrad = receiveGrad.zeroCopy(); // unlike full, needs to reset receiveGrad
 		int r = this.layerParam.convRadius - 1;
 		int nc = this.layerParam.numConvs;
