@@ -24,13 +24,13 @@ public class Trainer {
 
 	private final Random rand = new Random();
 
-	public Trainer(double trainingRate, Network net, Fitness trainFit, double percentToDo, boolean stochastic, int batchSize, int ram) {
+	public Trainer(double trainingRate, Network net, Fitness trainFit, double percentToDo, int batchSize, int ram) {
 		this.trainingRate = trainingRate;
 		this.net = net;
 		this.ram = ram;
 		this.data = trainFit.getData();
 		this.answers = trainFit.getAnswers();
-		this.toDo = stochastic ? batchSize : (int) (data.length * percentToDo);
+		this.toDo = (int) (data.length * percentToDo);
 		this.scaling = 2.0 / (toDo * net.param.numOutputs);
 		this.mses = new double[ram];
 	}
