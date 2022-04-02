@@ -1,13 +1,13 @@
 package digitrecognition;
 
-import core.LayeredNetwork;
+import core.network.Network;
 
 import javax.swing.*;
 
-public class Run2 {
+public class RunDraw {
 
 	public static void main(String[] args) {
-		LayeredNetwork net = new LayeredNetwork("networks");
+		Network net = Network.deserialize("networks");
 
 		JFrame frame = new JFrame("Canvas Example");
 		frame.add(new DigitDrawing(net));

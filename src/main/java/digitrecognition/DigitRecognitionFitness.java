@@ -1,7 +1,7 @@
 package digitrecognition;
 
 import core.Fitness;
-import core.Network;
+import core.network.Network;
 import core.Utility;
 
 import java.io.DataInputStream;
@@ -13,21 +13,17 @@ import java.nio.file.Paths;
 
 public class DigitRecognitionFitness implements Fitness {
 
-	// if false, does test
-	private final boolean training;
 	private final double percentToDo;
 	private final boolean printWrong;
 	private double[][] images;
 	private double[] labels;
 	private double[][] answers;
-	private final String imagesPathString;
-	private final String labelsPathString;
-	private final Utility util = Utility.getUtility();
 
 	public DigitRecognitionFitness(boolean training, double percentToDo, boolean onOffPixels, boolean printWrong) {
-		this.training = training;
 		this.percentToDo = percentToDo;
 		this.printWrong = printWrong;
+		String imagesPathString;
+		String labelsPathString;
 		if (training) {
 			imagesPathString = "training/train-images.idx3-ubyte";
 			labelsPathString = "training/train-labels.idx1-ubyte";
@@ -93,7 +89,7 @@ public class DigitRecognitionFitness implements Fitness {
 	}
 
 	public double convertByte(byte b) {
-		double r = 0.0;
+		double r;
 		if (b >= 0) {
 			r = b;
 		} else {
@@ -102,7 +98,7 @@ public class DigitRecognitionFitness implements Fitness {
 		return (r / 256.0);
 	}
 
-	private void read(InputStream inputStream, byte data[])
+	private void read(InputStream inputStream, byte[] data)
 			throws IOException
 	{
 		int offset = 0;
@@ -124,28 +120,14 @@ public class DigitRecognitionFitness implements Fitness {
 				+ " bytes, but only found " + offset);
 	}
 
-	public double mse(Network net, int k) {
-		return Utility.getUtility().mse(net.evaluate(images[k]), (int) labels[k]);
-	}
-
-	@Override
-	public double mse(Network net) {
-		double mse = 0;
-		for (int i = 0; i < ((double) labels.length) * percentToDo; i++) {
-			mse += mse(net, i);
-		}
-		mse = mse / (((double) labels.length) * percentToDo);
-		return mse;
-	}
-
 	@Override
 	public double percentCorrect(Network net) {
 		double percent = 0;
 		double[] response;
 		int guess;
 		for (int i = 0; i < ((double) labels.length) * percentToDo; i++) {
-			response = net.evaluate(images[i]);
-			guess = util.maxIndex(response);
+			response = net.evaluate(images[i], 0);
+			guess = Utility.maxIndex(response);
 			if (guess == labels[i]) {
 				percent += 1.0;
 			} else if (printWrong) {
@@ -154,7 +136,7 @@ public class DigitRecognitionFitness implements Fitness {
 				System.out.println("Label = " + labels[i]);
 				printOutput(response);
 				System.out.println("Guess = " + guess);
-				System.out.println("");
+				System.out.println();
 			}
 		}
 		percent = percent / (((double) labels.length) * percentToDo);
@@ -164,7 +146,7 @@ public class DigitRecognitionFitness implements Fitness {
 	public void printOutput(double[] output) {
 		System.out.print("[");
 		for (int i = 0; i < 10; i++) {
-			System.out.print(" " + i + ":" + util.roundString(output[i]));
+			System.out.print(" " + i + ":" + Utility.roundString(output[i]));
 		}
 		System.out.println("]");
 	}

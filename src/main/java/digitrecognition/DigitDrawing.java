@@ -1,24 +1,21 @@
 package digitrecognition;
 
-import core.LayeredNetwork;
+import core.network.Network;
 import core.Utility;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Random;
 
 public class DigitDrawing extends JPanel implements MouseListener, KeyListener, MouseMotionListener {
 
-	LayeredNetwork net;
-	Utility util = Utility.getUtility();
+	Network net;
 
-	Random rand = new Random();
 	double[] cells = new double[28 * 28];
 	int lastX = -1;
 	int lastY = -1;
 
-	public DigitDrawing(LayeredNetwork net) {
+	public DigitDrawing(Network net) {
 		this.setBackground (Color.WHITE);
 		this.setSize(560, 560);
 		this.addMouseListener(this);
@@ -51,29 +48,15 @@ public class DigitDrawing extends JPanel implements MouseListener, KeyListener, 
 		return new Color((int) (255 * (1 - x)), (int) (255 * (1 - x)), (int) (255 * (1 - x)));
 	}
 
-	public Color randColor() {
-		switch(rand.nextInt(4)) {
-			case 0:
-				return Color.GREEN;
-			case 1:
-				return Color.RED;
-			case 2:
-				return Color.BLUE;
-			case 3:
-				return Color.YELLOW;
-		}
-		return null;
-	}
-
 	public void paintCells(int x, int y) {
 		int cellX = toCellIndex(x);
 		int cellY = toCellIndex(y);
-		increaseToMax(cellX, cellY, 0.8);
+		increaseToMax(cellX, cellY, 0.5);
 		if (cellX != lastX || cellY != lastY) {
-			increaseToMax(cellX + 1, cellY, 0.5);
-			increaseToMax(cellX - 1, cellY, 0.5);
-			increaseToMax(cellX, cellY + 1, 0.5);
-			increaseToMax(cellX, cellY - 1, 0.5);
+			increaseToMax(cellX + 1, cellY, 0.3);
+			increaseToMax(cellX - 1, cellY, 0.3);
+			increaseToMax(cellX, cellY + 1, 0.3);
+			increaseToMax(cellX, cellY - 1, 0.3);
 			increaseToMax(cellX + 1, cellY + 1, 0.1);
 			increaseToMax(cellX - 1, cellY + 1, 0.1);
 			increaseToMax(cellX + 1, cellY + 1, 0.1);
@@ -112,11 +95,11 @@ public class DigitDrawing extends JPanel implements MouseListener, KeyListener, 
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		double[] output = net.evaluate(cells);
-		System.out.println("I think you drew a " + util.maxIndex(output) + "!");
+		double[] output = net.evaluate(cells, 0);
+		System.out.println("I think you drew a " + Utility.maxIndex(output) + "!");
 		System.out.print("[ ");
 		for (int i = 0; i < 10; i++) {
-			System.out.print(i + ": " + util.roundString(output[i]) + " ");
+			System.out.print(i + ": " + Utility.roundString(output[i]) + " ");
 		}
 		System.out.println("]");
 	}
