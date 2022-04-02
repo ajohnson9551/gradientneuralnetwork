@@ -24,7 +24,7 @@ public class Trainer {
 
 	private final Random rand = new Random();
 
-	public Trainer(double trainingRate, Network net, Fitness trainFit, double percentToDo, int batchSize, int ram) {
+	public Trainer(double trainingRate, Network net, Fitness trainFit, int batchSize, int ram) {
 		this.trainingRate = trainingRate;
 		this.net = net;
 		this.ram = ram;
