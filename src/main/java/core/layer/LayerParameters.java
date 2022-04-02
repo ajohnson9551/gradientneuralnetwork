@@ -50,7 +50,6 @@ public abstract class LayerParameters implements Serializable {
 	public LayerParameters(int convRadius, int numConvs, int pad, ActFunc actFunc) {
 		assert convRadius > 0;
 		assert numConvs > 0;
-		assert pad >= 0;
 		this.actFunc = actFunc;
 		this.poolSize = 0;
 		this.convRadius = convRadius;

@@ -51,12 +51,12 @@ public class DigitDrawing extends JPanel implements MouseListener, KeyListener, 
 	public void paintCells(int x, int y) {
 		int cellX = toCellIndex(x);
 		int cellY = toCellIndex(y);
-		increaseToMax(cellX, cellY, 0.5);
+		increaseToMax(cellX, cellY, 0.6);
 		if (cellX != lastX || cellY != lastY) {
-			increaseToMax(cellX + 1, cellY, 0.3);
-			increaseToMax(cellX - 1, cellY, 0.3);
-			increaseToMax(cellX, cellY + 1, 0.3);
-			increaseToMax(cellX, cellY - 1, 0.3);
+			increaseToMax(cellX + 1, cellY, 0.4);
+			increaseToMax(cellX - 1, cellY, 0.4);
+			increaseToMax(cellX, cellY + 1, 0.4);
+			increaseToMax(cellX, cellY - 1, 0.4);
 			increaseToMax(cellX + 1, cellY + 1, 0.2);
 			increaseToMax(cellX - 1, cellY + 1, 0.2);
 			increaseToMax(cellX + 1, cellY + 1, 0.2);
