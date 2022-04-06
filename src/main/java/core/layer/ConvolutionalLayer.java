@@ -76,17 +76,13 @@ public class ConvolutionalLayer extends Layer {
 				Utility.setIfCan(gradX, (i - convMod) + ci, (j - convMod) + cj, xk, this.Cs[ci + r][cj + r][n] * this.lastPrime[batchIndex][i][j][k]);
 			}
 		}
+		this.gradXNonzeroRanges[0][0] = Math.max(0, (i - convMod) - r);
+		this.gradXNonzeroRanges[0][1] = Math.min(this.layerParam.inputSize[0] - 1, (i - convMod) + r);
+		this.gradXNonzeroRanges[1][0] = Math.max(0, (j - convMod) - r);
+		this.gradXNonzeroRanges[1][1] = Math.min(this.layerParam.inputSize[1] - 1, (j - convMod) + r);
+		this.gradXNonzeroRanges[2][0] = k / this.layerParam.numConvs;
+		this.gradXNonzeroRanges[2][1] = k / this.layerParam.numConvs;
 		return gradX;
-	}
-
-	@Override
-	public int[][] getGradientXNonzeroRanges(int i, int j, int k) {
-		int r = this.layerParam.convRadius - 1;
-		int convMod = this.layerParam.convMod;
-		int[] iRange = new int[]{Math.max(0, (i - convMod) - r), Math.min(this.layerParam.inputSize[0] - 1, (i - convMod) + r)};
-		int[] jRange = new int[]{Math.max(0, (j - convMod) - r), Math.min(this.layerParam.inputSize[1] - 1, (j - convMod) + r)};
-		int[] kRange = new int[]{k / this.layerParam.numConvs, k / this.layerParam.numConvs};
-		return new int[][]{iRange, jRange, kRange};
 	}
 
 	@Override

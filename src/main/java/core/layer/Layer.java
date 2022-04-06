@@ -8,6 +8,7 @@ public abstract class Layer implements Serializable {
 
 	public double[][][][] lastX;
 	public double[][][][] lastPrime;
+	public int[][] gradXNonzeroRanges = new int[3][2];
 
 	public Layer(LayerParameters layerParam) {
 		this.layerParam = layerParam;
@@ -34,7 +35,6 @@ public abstract class Layer implements Serializable {
 
 	public abstract double[][][] evaluate(double[][][] x, int batchIndex);
 	public abstract double[][][] getGradientX(int i, int j, int k, int batchIndex);
-	public abstract int[][] getGradientXNonzeroRanges(int i, int j, int k);
 	public abstract void train(Layer[] grads, double trainingRate);
 	public abstract void combineScale(Layer grad, double scale);
 	public abstract Layer zeroCopy();

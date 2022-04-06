@@ -17,6 +17,10 @@ public class FullLayer extends Layer {
 				layerParams.outputSize[0] * layerParams.outputSize[1] * layerParams.outputSize[2],
 				layerParams.inputSize[0] * layerParams.inputSize[1] * layerParams.inputSize[2],
 				true);
+		int[] iRange = new int[]{0, this.layerParam.inputSize[0] - 1};
+		int[] jRange = new int[]{0, this.layerParam.inputSize[1] - 1};
+		int[] kRange = new int[]{0, this.layerParam.inputSize[2] - 1};
+		this.gradXNonzeroRanges = new int[][]{iRange, jRange, kRange};
 	}
 
 	private FullLayer(LayerParameters layerParams, boolean randomize) {
@@ -118,14 +122,6 @@ public class FullLayer extends Layer {
 			}
 		}
 		return gradX;
-	}
-
-	@Override
-	public int[][] getGradientXNonzeroRanges(int i, int j, int k) {
-		int[] iRange = new int[]{0, this.layerParam.inputSize[0] - 1};
-		int[] jRange = new int[]{0, this.layerParam.inputSize[1] - 1};
-		int[] kRange = new int[]{0, this.layerParam.inputSize[2] - 1};
-		return new int[][]{iRange, jRange, kRange};
 	}
 
 	@Override

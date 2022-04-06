@@ -13,6 +13,7 @@ public abstract class LayerParameters implements Serializable {
 
 	public final int poolSize;
 	public final int stride;
+	public final PoolType poolType;
 
 	public final int convRadius;
 	public final int numConvs;
@@ -30,10 +31,11 @@ public abstract class LayerParameters implements Serializable {
 		this.stride = 0;
 		this.pad = 0;
 		this.convMod = 0;
+		this.poolType = null;
 		this.layerType = LayerType.FULL;
 	}
 
-	public LayerParameters(int poolSize, int stride) {
+	public LayerParameters(int poolSize, int stride, PoolType poolType) {
 		this.actFunc = null;
 		this.poolSize = poolSize;
 		this.convRadius = 0;
@@ -41,6 +43,7 @@ public abstract class LayerParameters implements Serializable {
 		this.pad = 0;
 		this.stride = stride;
 		this.convMod = 0;
+		this.poolType = poolType;
 		this.layerType = LayerType.POOL;
 	}
 
@@ -52,6 +55,7 @@ public abstract class LayerParameters implements Serializable {
 		this.pad = pad;
 		this.stride = 0;
 		this.convMod = Math.min(0, 1 + pad - convRadius);
+		this.poolType = null;
 		this.layerType = LayerType.CONV;
 	}
 

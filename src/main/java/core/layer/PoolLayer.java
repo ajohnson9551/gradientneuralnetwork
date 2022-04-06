@@ -7,9 +7,12 @@ import java.util.Arrays;
 public class PoolLayer extends Layer {
 
 	int[] coordsOfLargest;
+	double[] ks;
 
 	public PoolLayer(LayerParameters layerParams) {
 		super(layerParams);
+		ks = new double[this.layerParam.inputSize[2]]; // for avg
+		Arrays.fill(ks,1.0 / (this.layerParam.poolSize * this.layerParam.poolSize));
 	}
 
 	@Override
@@ -20,12 +23,28 @@ public class PoolLayer extends Layer {
 		for (int k = 0; k < this.layerParam.outputSize[2]; k++) {
 			for (int j = 0; j < this.layerParam.outputSize[1]; j++) {
 				for (int i = 0; i < this.layerParam.outputSize[0]; i++) {
-					y[i][j][k] = maxInRange(x, i * stride, j * stride, k, range);
+					switch (this.layerParam.poolType) {
+						case MAX:
+							y[i][j][k] = maxInRange(x, i * stride, j * stride, k, range);
+						case AVG:
+							y[i][j][k] = avgInRange(x, i * stride, j * stride, k, range);
+					}
+
 				}
 			}
 		}
 		this.lastX[batchIndex] = x;
 		return y;
+	}
+
+	private double avgInRange(double[][][] x, int i, int j, int k, int range) {
+		double avg = 0;
+		for (int i1 = i; i1 < i + range; i1++) {
+			for (int j1 = j; j1 < j + range; j1++) {
+				avg += Utility.getOrDefault(x, i1, j1, k, 0);
+			}
+		}
+		return avg / (range * range);
 	}
 
 	public static double maxInRange(double[][][] x, int i, int j, int k, int range) {
@@ -46,30 +65,43 @@ public class PoolLayer extends Layer {
 		double[][][] gradX = new double[this.layerParam.inputSize[0]][this.layerParam.inputSize[1]][this.layerParam.inputSize[2]];
 		int xi = this.layerParam.stride * i;
 		int xj = this.layerParam.stride * j;
-		int[] coordsOfLargest = new int[]{xi, xj};
-		double max = this.lastX[batchIndex][xi][xj][k];
-		for (int xi1 = xi; xi1 < xi + this.layerParam.poolSize; xi1++) {
-			for (int xj1 = xj; xj1 < xj + this.layerParam.poolSize; xj1++) {
-				double m = Utility.getOrDefault(this.lastX[batchIndex], xi1, xj1, k, -Double.MAX_VALUE);
-				if (m > max) {
-					max = m;
-					coordsOfLargest[0] = xi1;
-					coordsOfLargest[1] = xj1;
+		int range = this.layerParam.poolSize;
+		switch (this.layerParam.poolType) {
+			case MAX:
+				int[] coordsOfLargest = new int[]{xi, xj};
+				double max = this.lastX[batchIndex][xi][xj][k];
+				for (int xi1 = xi; xi1 < xi + range; xi1++) {
+					for (int xj1 = xj; xj1 < xj + range; xj1++) {
+						double m = Utility.getOrDefault(this.lastX[batchIndex], xi1, xj1, k, -Double.MAX_VALUE);
+						if (m > max) {
+							max = m;
+							coordsOfLargest[0] = xi1;
+							coordsOfLargest[1] = xj1;
+						}
+					}
 				}
-			}
+				this.coordsOfLargest = coordsOfLargest;
+				this.gradXNonzeroRanges[0][0] = coordsOfLargest[0];
+				this.gradXNonzeroRanges[0][1] = coordsOfLargest[0];
+				this.gradXNonzeroRanges[1][0] = coordsOfLargest[1];
+				this.gradXNonzeroRanges[1][1] = coordsOfLargest[1];
+				this.gradXNonzeroRanges[2][0] = k;
+				this.gradXNonzeroRanges[2][1] = k;
+				gradX[coordsOfLargest[0]][coordsOfLargest[1]][k] = 1;
+			case AVG:
+				for (int xi1 = xi; xi1 < xi + range; xi1++) {
+					for (int xj1 = xj; xj1 < xj + range; xj1++) {
+						gradX[xi1][xj1] = this.ks;
+					}
+				}
+				this.gradXNonzeroRanges[0][0] = xi;
+				this.gradXNonzeroRanges[0][1] = Math.min(this.layerParam.inputSize[0] - 1, xi + range);
+				this.gradXNonzeroRanges[1][0] = xj;
+				this.gradXNonzeroRanges[1][1] = Math.min(this.layerParam.inputSize[1] - 1, xj + range);
+				this.gradXNonzeroRanges[2][0] = k;
+				this.gradXNonzeroRanges[2][1] = k;
 		}
-		this.coordsOfLargest = coordsOfLargest;
-		gradX[coordsOfLargest[0]][coordsOfLargest[1]][k] = 1;
 		return gradX;
-	}
-
-	@Override
-	public int[][] getGradientXNonzeroRanges(int i, int j, int k) {
-		int[] iRange = new int[]{this.coordsOfLargest[0], this.coordsOfLargest[0]};
-		int[] jRange = new int[]{this.coordsOfLargest[1], this.coordsOfLargest[1]};
-		int[] kRange = new int[]{k, k};
-		this.coordsOfLargest = null;
-		return new int[][]{iRange, jRange, kRange};
 	}
 
 	@Override

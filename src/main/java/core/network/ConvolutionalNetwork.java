@@ -32,7 +32,7 @@ public class ConvolutionalNetwork extends Network {
 
 	public void computeBackProp(double[] ans, double[] eval, int batchIndex) {
 		double[][][][] gradMult;
-		double[][][][] nextGradMult = new double[param.numOutputs][1][1][param.numOutputs];
+		double[][][][] nextGradMult = new double[this.param.numOutputs][1][1][this.param.numOutputs];
 
 		for (int i = 0; i < param.numOutputs; i++) {
 			nextGradMult[i][0][0][i] = eval[i] - ans[i];
@@ -53,23 +53,21 @@ public class ConvolutionalNetwork extends Network {
 			for (int k = 0; k < outputDepth; k++) {
 				for (int j = 0; j < outputHeight; j++) {
 					for (int i = 0; i < outputWidth; i++) {
-						boolean someNonzero = false;
+						int lowestNonzero = this.param.numOutputs;
 						for (int r = 0; r < this.param.numOutputs; r++) {
 							if (gradMult[i][j][k][r] != 0) {
-								someNonzero = true;
+								lowestNonzero = r;
 								break;
 							}
 						}
-						if (!someNonzero) {
+						if (lowestNonzero == this.param.numOutputs) {
 							continue;
 						}
 						layer.assignGradientInto(outputGrad, i, j, k, batchIndex);
 						double[][][] gradX = layer.getGradientX(i, j, k, batchIndex);
-						int[][] gradXRanges = layer.getGradientXNonzeroRanges(i, j, k);
-						for (int r = 0; r < this.param.numOutputs; r++) {
-							Layer grad = layer.zeroCopy();
+						int[][] gradXRanges = layer.gradXNonzeroRanges;
+						for (int r = lowestNonzero; r < this.param.numOutputs; r++) {
 							if (gradMult[i][j][k][r] != 0) {
-								grad.combineScale(outputGrad, gradMult[i][j][k][r]);
 								if (l > 0) {
 									for (int k1 = gradXRanges[2][0]; k1 <= gradXRanges[2][1]; k1++) {
 										for (int j1 = gradXRanges[1][0]; j1 <= gradXRanges[1][1]; j1++) {
@@ -79,7 +77,7 @@ public class ConvolutionalNetwork extends Network {
 										}
 									}
 								}
-								this.grads[l][r].combineScale(grad, 1);
+								this.grads[l][r].combineScale(outputGrad, gradMult[i][j][k][r]);
 							}
 						}
 					}

@@ -40,11 +40,11 @@ public class Trainer {
 			if (net instanceof ConvolutionalNetwork) {
 				trainStep((ConvolutionalNetwork) net);
 			}
-			String cycleText = "Cycle " + cycle + "/" + cycles;
+			String cycleText = "Cycle " + (cycle + 1) + "/" + cycles;
 			if (ram > 0) {
-				cycleText += ", Run Avg Mse = " + Utility.avgString(mses);
+				cycleText += ", Run Avg Mse =" + Utility.avgString(mses);
 			}
-			cycleText += ", All Avg Mse = " + Utility.roundString(allTimeMse);
+			cycleText += ", All Avg Mse =" + Utility.roundString(allTimeMse);
 			System.out.println(cycleText);
 			cycle++;
 		}
