@@ -34,7 +34,7 @@ public class ConvolutionalNetwork extends Network {
 		double[][][][] gradMult;
 		double[][][][] nextGradMult = new double[this.param.numOutputs][1][1][this.param.numOutputs];
 
-		for (int i = 0; i < param.numOutputs; i++) {
+		for (int i = 0; i < this.param.numOutputs; i++) {
 			nextGradMult[i][0][0][i] = eval[i] - ans[i];
 		}
 

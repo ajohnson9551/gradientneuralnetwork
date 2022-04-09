@@ -10,24 +10,38 @@ public class FullLayer extends Layer {
 	double[][] A;
 	double[] b;
 
+	int[] inputSize;
+	int[] outputSize;
+
+	int numInputs;
+	int numOutputs;
+
 	public FullLayer(LayerParameters layerParams) {
 		super(layerParams);
 		assert this.validateParameters();
-		this.setupAB(
-				layerParams.outputSize[0] * layerParams.outputSize[1] * layerParams.outputSize[2],
-				layerParams.inputSize[0] * layerParams.inputSize[1] * layerParams.inputSize[2],
-				true);
-		int[] iRange = new int[]{0, this.layerParam.inputSize[0] - 1};
-		int[] jRange = new int[]{0, this.layerParam.inputSize[1] - 1};
-		int[] kRange = new int[]{0, this.layerParam.inputSize[2] - 1};
+		this.inputSize = this.layerParam.inputSize;
+		this.outputSize = this.layerParam.outputSize;
+		int[] iRange = new int[]{0, this.inputSize[0] - 1};
+		int[] jRange = new int[]{0, this.inputSize[1] - 1};
+		int[] kRange = new int[]{0, this.inputSize[2] - 1};
 		this.gradXNonzeroRanges = new int[][]{iRange, jRange, kRange};
+		this.numInputs = this.inputSize[0] * this.inputSize[1] * this.inputSize[2];
+		this.numOutputs = this.outputSize[0] * this.outputSize[1] * this.outputSize[2];
+		this.setupAB(
+				numOutputs,
+				numInputs,
+				true);
 	}
 
 	private FullLayer(LayerParameters layerParams, boolean randomize) {
 		super(layerParams);
+		this.inputSize = this.layerParam.inputSize;
+		this.outputSize = this.layerParam.outputSize;
+		this.numInputs = this.inputSize[0] * this.inputSize[1] * this.inputSize[2];
+		this.numOutputs = this.outputSize[0] * this.outputSize[1] * this.outputSize[2];
 		this.setupAB(
-				layerParams.outputSize[0] * layerParams.outputSize[1] * layerParams.outputSize[2],
-				layerParams.inputSize[0] * layerParams.inputSize[1] * layerParams.inputSize[2],
+				this.numOutputs,
+				this.numInputs,
 				randomize);
 	}
 
@@ -38,9 +52,9 @@ public class FullLayer extends Layer {
 
 	@Override
 	public void assignGradientInto(Layer receiveGrad, int i, int j, int k, int batchIndex) {
-		for (int ai = 0; ai < this.A.length; ai++) {
-			for (int aj = 0; aj < this.A[0].length; aj++) {
-				((FullLayer) receiveGrad).A[ai][aj] = ai == i ? this.lastPrime[batchIndex][i][j][k] * this.lastX[batchIndex][aj % this.lastX[batchIndex].length][(aj / this.lastX[batchIndex].length) % this.lastX[batchIndex][0].length][aj / (this.lastX[batchIndex].length * lastX[batchIndex][0].length)] : 0;
+		for (int ai = 0; ai < this.numOutputs; ai++) {
+			for (int aj = 0; aj < this.numInputs; aj++) {
+				((FullLayer) receiveGrad).A[ai][aj] = ai == i ? this.lastPrime[batchIndex][i][j][k] * this.lastX[batchIndex][aj % this.inputSize[0]][(aj / this.inputSize[0]) % this.inputSize[1]][aj / (this.inputSize[0] * this.inputSize[1])] : 0;
 			}
 			((FullLayer) receiveGrad).b[ai] = ai == i ? this.lastPrime[batchIndex][i][j][k] : 0;
 		}
@@ -48,8 +62,8 @@ public class FullLayer extends Layer {
 
 	@Override
 	public void combineScale(Layer addLayer, double scale) {
-		for (int i = 0; i < A.length; i++) {
-			for (int j = 0; j < A[0].length; j++) {
+		for (int i = 0; i < this.numOutputs; i++) {
+			for (int j = 0; j < this.numInputs; j++) {
 				this.A[i][j] += scale * ((FullLayer) addLayer).A[i][j];
 			}
 			this.b[i] += scale * ((FullLayer) addLayer).b[i];
@@ -61,8 +75,8 @@ public class FullLayer extends Layer {
 		if (!super.validateParameters()) {
 			return false;
 		}
-		return (layerParam.outputSize[1] == 1 &&
-				layerParam.outputSize[2] == 1);
+		return (this.layerParam.outputSize[1] == 1 &&
+				this.layerParam.outputSize[2] == 1);
 	}
 
 	private void setupAB(int rows, int columns, boolean randomize) {
@@ -113,11 +127,11 @@ public class FullLayer extends Layer {
 
 	@Override
 	public double[][][] getGradientX(int i, int j, int k, int batchIndex) {
-		double[][][] gradX = new double[this.lastX[batchIndex].length][this.lastX[batchIndex][0].length][this.lastX[batchIndex][0][0].length];
-		for (int xk = 0; xk < this.lastX[batchIndex][0][0].length; xk++) {
-			for (int xj = 0; xj < this.lastX[batchIndex][0].length; xj++) {
-				for (int xi = 0; xi < this.lastX[batchIndex].length; xi++) {
-					gradX[xi][xj][xk] = this.lastPrime[batchIndex][i][j][k] * A[i][xi + xj * this.lastX[batchIndex].length + xk * this.lastX[batchIndex].length * this.lastX[batchIndex][0].length];
+		double[][][] gradX = new double[this.inputSize[0]][this.inputSize[1]][this.inputSize[2]];
+		for (int xk = 0; xk < this.inputSize[2]; xk++) {
+			for (int xj = 0; xj < this.inputSize[1]; xj++) {
+				for (int xi = 0; xi < this.inputSize[0]; xi++) {
+					gradX[xi][xj][xk] = this.lastPrime[batchIndex][i][j][k] * A[i][xi + xj * this.inputSize[0] + xk * this.inputSize[0] * this.inputSize[1]];
 				}
 			}
 		}
