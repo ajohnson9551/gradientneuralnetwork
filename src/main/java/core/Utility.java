@@ -66,6 +66,13 @@ public final class Utility {
 		x[i][j][k] = value;
 	}
 
+	public static void setIfCan(double[][][] x, int i, int j, double[] arr) {
+		if (i < 0 || i >= x.length || j < 0 || j >= x[0].length) {
+			return;
+		}
+		x[i][j] = arr;
+	}
+
 	public static double mse(double[] guess, double[] correct) {
 		double e = 0;
 		for (int i = 0; i < guess.length; i++) {

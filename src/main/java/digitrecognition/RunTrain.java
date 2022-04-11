@@ -16,17 +16,18 @@ public class RunTrain {
 
 		long t0 = System.currentTimeMillis();
 
-		int cycles = 480000;
-		double trainingRate = 3;
-		int stochasticBatchSize = 2;
+		int cycles = 60000;
+		double trainingRate = 1;
+		int stochasticBatchSize = 10;
 		int ram = 10;
 
 		List<LayerParameters> layerParams = new ArrayList<>(List.of(
-				new ConvolutionalLayerParameters(2, 4, -1, ActFunc.RELU),
+				new ConvolutionalLayerParameters(2, 3, 0, ActFunc.RELU),
 				new PoolLayerParameters(2, 2, PoolType.AVG),
-				new ConvolutionalLayerParameters(2, 4, 1, ActFunc.RELU),
-				new PoolLayerParameters(3, 3, PoolType.AVG),
-				new FullLayerParameters(100, ActFunc.SIGMOID),
+				new ConvolutionalLayerParameters(2, 3, 1, ActFunc.RELU),
+				new PoolLayerParameters(3, 2, PoolType.AVG),
+				new ConvolutionalLayerParameters(2, 3, 1, ActFunc.RELU),
+				new PoolLayerParameters(6, 6, PoolType.MAX),
 				new FullLayerParameters(10, ActFunc.SIGMOID)
 		));
 

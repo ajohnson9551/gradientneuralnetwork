@@ -24,10 +24,8 @@ public class PoolLayer extends Layer {
 			for (int j = 0; j < this.layerParam.outputSize[1]; j++) {
 				for (int i = 0; i < this.layerParam.outputSize[0]; i++) {
 					switch (this.layerParam.poolType) {
-						case MAX:
-							y[i][j][k] = maxInRange(x, i * stride, j * stride, k, range);
-						case AVG:
-							y[i][j][k] = avgInRange(x, i * stride, j * stride, k, range);
+						case MAX -> y[i][j][k] = maxInRange(x, i * stride, j * stride, k, range);
+						case AVG -> y[i][j][k] = avgInRange(x, i * stride, j * stride, k, range);
 					}
 
 				}
@@ -67,7 +65,7 @@ public class PoolLayer extends Layer {
 		int xj = this.layerParam.stride * j;
 		int range = this.layerParam.poolSize;
 		switch (this.layerParam.poolType) {
-			case MAX:
+			case MAX -> {
 				int[] coordsOfLargest = new int[]{xi, xj};
 				double max = this.lastX[batchIndex][xi][xj][k];
 				for (int xi1 = xi; xi1 < xi + range; xi1++) {
@@ -88,10 +86,11 @@ public class PoolLayer extends Layer {
 				this.gradXNonzeroRanges[2][0] = k;
 				this.gradXNonzeroRanges[2][1] = k;
 				gradX[coordsOfLargest[0]][coordsOfLargest[1]][k] = 1;
-			case AVG:
+			}
+			case AVG -> {
 				for (int xi1 = xi; xi1 < xi + range; xi1++) {
 					for (int xj1 = xj; xj1 < xj + range; xj1++) {
-						gradX[xi1][xj1] = this.ks;
+						Utility.setIfCan(gradX, xi1, xj1, this.ks);
 					}
 				}
 				this.gradXNonzeroRanges[0][0] = xi;
@@ -100,6 +99,7 @@ public class PoolLayer extends Layer {
 				this.gradXNonzeroRanges[1][1] = Math.min(this.layerParam.inputSize[1] - 1, xj + range);
 				this.gradXNonzeroRanges[2][0] = k;
 				this.gradXNonzeroRanges[2][1] = k;
+			}
 		}
 		return gradX;
 	}
