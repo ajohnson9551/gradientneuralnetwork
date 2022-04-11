@@ -20,12 +20,12 @@ public class ConvolutionalLayer extends Layer {
 	}
 
 	private void setupCs(boolean randomize) {
-		this.Cs = new double[2 * this.layerParam.convRadius - 1][2 * this.layerParam.convRadius - 1][this.layerParam.numConvs];
+		this.Cs = new double[this.layerParam.numConvs][2 * this.layerParam.convRadius - 1][2 * this.layerParam.convRadius - 1];
 		if (randomize) {
-			for (int n = 0; n < this.Cs[0][0].length; n++) {
-				for (int j = 0; j < this.Cs[0].length; j++) {
-					 for (int i = 0; i < this.Cs.length; i++) {
-						 this.Cs[i][j][n] = Utility.randVal(0, 3);
+			for (int n = 0; n < this.Cs.length; n++) {
+				for (int j = 0; j < this.Cs[0][0].length; j++) {
+					 for (int i = 0; i < this.Cs[0].length; i++) {
+						 this.Cs[n][i][j] = Utility.randVal(0, 3);
 					}
 				}
 			}
@@ -58,7 +58,7 @@ public class ConvolutionalLayer extends Layer {
 		int r = this.layerParam.convRadius - 1;
 		for (int cj = -r; cj <= r; cj++) {
 			for (int ci = -r; ci <= r; ci++) {
-				result += Utility.getOrDefault(x, i + ci, j + cj, k, 0) * Cs[ci + r][cj + r][n];
+				result += Utility.getOrDefault(x, i + ci, j + cj, k, 0) * Cs[n][ci + r][cj + r];
 			}
 		}
 		return result;
@@ -73,7 +73,7 @@ public class ConvolutionalLayer extends Layer {
 		int convMod = this.layerParam.convMod;
 		for (int cj = -r; cj <= r; cj++) {
 			for (int ci = -r; ci <= r; ci++) {
-				Utility.setIfCan(gradX, (i - convMod) + ci, (j - convMod) + cj, xk, this.Cs[ci + r][cj + r][n] * this.lastPrime[batchIndex][i][j][k]);
+				Utility.setIfCan(gradX, (i - convMod) + ci, (j - convMod) + cj, xk, this.Cs[n][ci + r][cj + r] * this.lastPrime[batchIndex][i][j][k]);
 			}
 		}
 		this.gradXNonzeroRanges[0][0] = Math.max(0, (i - convMod) - r);
@@ -97,9 +97,9 @@ public class ConvolutionalLayer extends Layer {
 	@Override
 	public void combineScale(Layer grad, double scale) {
 		for (int n = 0; n < this.layerParam.numConvs; n++) {
-			for (int cj = 0; cj < this.Cs[0].length; cj++) {
-				for (int ci = 0; ci < this.Cs.length; ci++) {
-					this.Cs[ci][cj][n] += ((ConvolutionalLayer) grad).Cs[ci][cj][n] * scale;
+			for (int cj = 0; cj < this.Cs[0][0].length; cj++) {
+				for (int ci = 0; ci < this.Cs[0].length; ci++) {
+					this.Cs[n][ci][cj] += ((ConvolutionalLayer) grad).Cs[n][ci][cj] * scale;
 				}
 			}
 		}
@@ -118,7 +118,7 @@ public class ConvolutionalLayer extends Layer {
 		int convMod = this.layerParam.convMod;
 		for (int cj = -r; cj <= r; cj++) {
 			for (int ci = -r; ci <= r; ci++) {
-				((ConvolutionalLayer) receiveGrad).Cs[ci + r][cj + r][k % nc] = Utility.getOrDefault(this.lastX[batchIndex], (i - convMod) + ci, (j - convMod) + cj, k / nc, 0) * this.lastPrime[batchIndex][i][j][k];
+				((ConvolutionalLayer) receiveGrad).Cs[k % nc][ci + r][cj + r] = Utility.getOrDefault(this.lastX[batchIndex], (i - convMod) + ci, (j - convMod) + cj, k / nc, 0) * this.lastPrime[batchIndex][i][j][k];
 			}
 		}
 	}
