@@ -13,16 +13,16 @@ public class ConvolutionalNetwork extends Network {
 	private Layer[][] grads;
 	private final ConvolutionalNetworkParameters param;
 
-	private int batchIndex;
+	private transient int batchIndex;
 
-	private double[][][][][] gradMults;
+	private final transient double[][][][][] gradMults;
 
-	private final int[] outputWidths;
-	private final int[] outputHeights;
-	private final int[] outputDepths;
+	private transient final int[] outputWidths;
+	private transient final int[] outputHeights;
+	private transient final int[] outputDepths;
 
-	private final Kernel[] kernels;
-	private final Range[] ranges;
+	private transient final Kernel[] kernels;
+	private transient final Range[] ranges;
 
 	public ConvolutionalNetwork(ConvolutionalNetworkParameters param) {
 		super(param);

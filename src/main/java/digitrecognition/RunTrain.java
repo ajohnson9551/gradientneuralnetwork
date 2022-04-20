@@ -22,12 +22,11 @@ public class RunTrain {
 		int ram = 10;
 
 		List<LayerParameters> layerParams = new ArrayList<>(List.of(
-				new ConvolutionalLayerParameters(2, 3, 0, ActFunc.RELU),
+				new ConvolutionalLayerParameters(3, 4, 0, ActFunc.RELU),
 				new PoolLayerParameters(2, 2, PoolType.AVG),
-				new ConvolutionalLayerParameters(2, 3, 1, ActFunc.RELU),
-				new PoolLayerParameters(3, 2, PoolType.AVG),
-				new ConvolutionalLayerParameters(2, 3, 1, ActFunc.RELU),
-				new PoolLayerParameters(6, 6, PoolType.MAX),
+				new ConvolutionalLayerParameters(2, 4, 1, ActFunc.RELU),
+				new PoolLayerParameters(3, 3, PoolType.AVG),
+				new FullLayerParameters(100, ActFunc.SIGMOID),
 				new FullLayerParameters(10, ActFunc.SIGMOID)
 		));
 
