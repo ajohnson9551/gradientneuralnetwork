@@ -1,5 +1,7 @@
 package core.network;
 
+import com.aparapi.Kernel;
+import com.aparapi.Range;
 import core.layer.Layer;
 import core.layer.LayerParameters;
 
@@ -11,14 +13,89 @@ public class ConvolutionalNetwork extends Network {
 	private Layer[][] grads;
 	private final ConvolutionalNetworkParameters param;
 
+	private int batchIndex;
+
+	private double[][][][][] gradMults;
+
+	private final int[] outputWidths;
+	private final int[] outputHeights;
+	private final int[] outputDepths;
+
+	private final Kernel[] kernels;
+	private final Range[] ranges;
+
 	public ConvolutionalNetwork(ConvolutionalNetworkParameters param) {
 		super(param);
 		this.param = param;
 		this.layers = param.layers;
+
+		gradMults = new double[this.layers.length][][][][];
+
+		kernels = new Kernel[this.layers.length];
+		ranges = new Range[this.layers.length];
+
+		outputWidths = new int[this.layers.length];
+		outputHeights = new int[this.layers.length];
+		outputDepths = new int[this.layers.length];
+
 		for (int l = 0; l < this.layers.length; l++) {
 			this.layers[l].setupLasts(this.param.batchSize);
 			assert l >= this.layers.length - 1 || Arrays.equals(this.layers[l].layerParam.outputSize, this.layers[l + 1].layerParam.inputSize);
+
+			this.outputWidths[l] = this.layers[l].layerParam.outputSize[0];
+			this.outputHeights[l] = this.layers[l].layerParam.outputSize[1];
+			this.outputDepths[l] = this.layers[l].layerParam.outputSize[2];
+
+			ranges[l] = Range.create(outputWidths[l] * outputHeights[l] * outputDepths[l]);
+
+			int finalL = l;
+			kernels[l] = new Kernel() {
+				@Override
+				public void run() {
+					int ijk = getGlobalId();
+					int i = ijk % outputWidths[finalL];
+					int j = (ijk / outputWidths[finalL]) % outputHeights[finalL];
+					int k = (ijk / (outputHeights[finalL] * outputWidths[finalL])) % outputDepths[finalL];
+					Layer layer = layers[finalL];
+					LayerParameters layerParams = layer.layerParam;
+					int nextWidth = layerParams.inputSize[0];
+					int nextHeight = layerParams.inputSize[1];
+					int nextDepth = layerParams.inputSize[2];
+					if (finalL > 0) {
+						gradMults[finalL - 1] = new double[nextWidth][nextHeight][nextDepth][param.numOutputs];
+					}
+					Layer outputGrad = layer.zeroCopy();
+					int lowestNonzero = param.numOutputs;
+					for (int r = 0; r < param.numOutputs; r++) {
+						if (gradMults[finalL][i][j][k][r] != 0) {
+							lowestNonzero = r;
+							break;
+						}
+					}
+					if (lowestNonzero == param.numOutputs) {
+						return;
+					}
+					layers[finalL].assignGradientInto(outputGrad, i, j, k, batchIndex);
+					double[][][] gradX = layers[finalL].getGradientX(i, j, k, batchIndex);
+					int[][] gradXRanges = layers[finalL].gradXNonzeroRanges;
+					for (int r = lowestNonzero; r < param.numOutputs; r++) {
+						if (gradMults[finalL][i][j][k][r] != 0) {
+							if (finalL > 0) {
+								for (int k1 = gradXRanges[2][0]; k1 <= gradXRanges[2][1]; k1++) {
+									for (int j1 = gradXRanges[1][0]; j1 <= gradXRanges[1][1]; j1++) {
+										for (int i1 = gradXRanges[0][0]; i1 <= gradXRanges[0][1]; i1++) {
+											gradMults[finalL - 1][i1][j1][k1][r] += gradX[i1][j1][k1] * gradMults[finalL][i][j][k][r];
+										}
+									}
+								}
+							}
+							grads[finalL][r].combineScale(outputGrad, gradMults[finalL][i][j][k][r]);
+						}
+					}
+				}
+			};
 		}
+
 	}
 
 	public void prepareGrads() {
@@ -31,58 +108,15 @@ public class ConvolutionalNetwork extends Network {
 	}
 
 	public void computeBackProp(double[] ans, double[] eval, int batchIndex) {
-		double[][][][] gradMult;
-		double[][][][] nextGradMult = new double[this.param.numOutputs][1][1][this.param.numOutputs];
+		this.batchIndex = batchIndex;
 
+		gradMults[this.layers.length - 1] = new double[this.param.numOutputs][1][1][this.param.numOutputs];
 		for (int i = 0; i < this.param.numOutputs; i++) {
-			nextGradMult[i][0][0][i] = eval[i] - ans[i];
+			gradMults[this.layers.length - 1][i][0][0][i] = eval[i] - ans[i];
 		}
 
 		for (int l = this.layers.length - 1; l >= 0; l--) {
-			gradMult = nextGradMult;
-			Layer layer = this.layers[l];
-			LayerParameters layerParams = layer.layerParam;
-			int outputWidth = layerParams.outputSize[0];
-			int outputHeight = layerParams.outputSize[1];
-			int outputDepth = layerParams.outputSize[2];
-			int nextWidth = layerParams.inputSize[0];
-			int nextHeight = layerParams.inputSize[1];
-			int nextDepth = layerParams.inputSize[2];
-			nextGradMult = new double[nextWidth][nextHeight][nextDepth][this.param.numOutputs];
-			Layer outputGrad = layer.zeroCopy();
-			for (int k = 0; k < outputDepth; k++) {
-				for (int j = 0; j < outputHeight; j++) {
-					for (int i = 0; i < outputWidth; i++) {
-						int lowestNonzero = this.param.numOutputs;
-						for (int r = 0; r < this.param.numOutputs; r++) {
-							if (gradMult[i][j][k][r] != 0) {
-								lowestNonzero = r;
-								break;
-							}
-						}
-						if (lowestNonzero == this.param.numOutputs) {
-							continue;
-						}
-						layer.assignGradientInto(outputGrad, i, j, k, batchIndex);
-						double[][][] gradX = layer.getGradientX(i, j, k, batchIndex);
-						int[][] gradXRanges = layer.gradXNonzeroRanges;
-						for (int r = lowestNonzero; r < this.param.numOutputs; r++) {
-							if (gradMult[i][j][k][r] != 0) {
-								if (l > 0) {
-									for (int k1 = gradXRanges[2][0]; k1 <= gradXRanges[2][1]; k1++) {
-										for (int j1 = gradXRanges[1][0]; j1 <= gradXRanges[1][1]; j1++) {
-											for (int i1 = gradXRanges[0][0]; i1 <= gradXRanges[0][1]; i1++) {
-												nextGradMult[i1][j1][k1][r] += gradX[i1][j1][k1] * gradMult[i][j][k][r];
-											}
-										}
-									}
-								}
-								this.grads[l][r].combineScale(outputGrad, gradMult[i][j][k][r]);
-							}
-						}
-					}
-				}
-			}
+			this.kernels[l].execute(this.ranges[l]);
 		}
 	}
 
