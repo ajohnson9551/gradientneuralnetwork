@@ -104,10 +104,8 @@ public class PoolLayer extends Layer {
 		return gradX;
 	}
 
-	@Override
 	public void train(Layer[] grads, double trainingRate) {
 		// pool does not train
-		assert grads instanceof PoolLayer[];
 		Arrays.fill(this.lastX, null);
 	}
 

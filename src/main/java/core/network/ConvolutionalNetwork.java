@@ -10,8 +10,9 @@ import java.util.Arrays;
 public class ConvolutionalNetwork extends Network {
 
 	private final Layer[] layers;
-	private Layer[][] grads;
 	private final ConvolutionalNetworkParameters param;
+
+	private transient Layer[][] grads;
 
 	private transient int batchIndex;
 
@@ -95,7 +96,6 @@ public class ConvolutionalNetwork extends Network {
 				}
 			};
 		}
-
 	}
 
 	public void prepareGrads() {

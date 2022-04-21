@@ -61,12 +61,12 @@ public class FullLayer extends Layer {
 	}
 
 	@Override
-	public void combineScale(Layer addLayer, double scale) {
+	public void combineScale(Layer grad, double scale) {
 		for (int i = 0; i < this.numOutputs; i++) {
 			for (int j = 0; j < this.numInputs; j++) {
-				this.A[i][j] += scale * ((FullLayer) addLayer).A[i][j];
+				this.A[i][j] += scale * ((FullLayer) grad).A[i][j];
 			}
-			this.b[i] += scale * ((FullLayer) addLayer).b[i];
+			this.b[i] += scale * ((FullLayer) grad).b[i];
 		}
 	}
 

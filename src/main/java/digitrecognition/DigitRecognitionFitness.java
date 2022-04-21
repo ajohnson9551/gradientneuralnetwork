@@ -19,7 +19,7 @@ public class DigitRecognitionFitness implements Fitness {
 	private double[] labels;
 	private double[][] answers;
 
-	public DigitRecognitionFitness(boolean training, double percentToDo, boolean printWrong) {
+	public DigitRecognitionFitness(boolean training, double percentToDo, boolean printWrong, double tolerance) {
 		this.percentToDo = percentToDo;
 		this.printWrong = printWrong;
 		String imagesPathString;
@@ -73,7 +73,7 @@ public class DigitRecognitionFitness implements Fitness {
 			{
 				labels[n] = labelsDataInputStream.readByte();
 				for (int i = 0; i < 10; i++) {
-					answers[n][i] = i == labels[n] ? 1.0 : 0.0;
+					answers[n][i] = i == labels[n] ? 1.0 - tolerance : tolerance;
 				}
 				images[n] = new double[numRows * numCols];
 				byte[] imagesBytes = new byte[numRows * numCols];
