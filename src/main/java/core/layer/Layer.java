@@ -1,5 +1,7 @@
 package core.layer;
 
+import core.web.WLayer;
+
 import java.io.Serializable;
 
 public abstract class Layer implements Serializable {
@@ -33,6 +35,7 @@ public abstract class Layer implements Serializable {
 		this.lastPrime = new double[batchSize][][][];
 	}
 
+	public abstract WLayer webify();
 	public abstract double[][][] evaluate(double[][][] x, int batchIndex);
 	public abstract double[][][] getGradientX(int i, int j, int k, int batchIndex);
 	public abstract void train(Layer[] grads, double trainingRate);

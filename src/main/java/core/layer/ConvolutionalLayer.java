@@ -2,6 +2,9 @@ package core.layer;
 
 import core.ActFuncs;
 import core.Utility;
+import core.web.WConvolutionalLayer;
+import core.web.WFullLayer;
+import core.web.WLayer;
 
 import java.util.Arrays;
 
@@ -121,5 +124,10 @@ public class ConvolutionalLayer extends Layer {
 				((ConvolutionalLayer) receiveGrad).Cs[k % nc][ci + r][cj + r] = Utility.getOrDefault(this.lastX[batchIndex], (i - convMod) + ci, (j - convMod) + cj, k / nc, 0) * this.lastPrime[batchIndex][i][j][k];
 			}
 		}
+	}
+
+	@Override
+	public WLayer webify() {
+		return new WConvolutionalLayer(this.layerParam.inputSize, this.layerParam.outputSize, this.Cs, this.layerParam.pad, this.layerParam.actFunc);
 	}
 }

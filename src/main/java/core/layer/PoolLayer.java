@@ -1,6 +1,9 @@
 package core.layer;
 
 import core.Utility;
+import core.web.WConvolutionalLayer;
+import core.web.WLayer;
+import core.web.WPoolLayer;
 
 import java.util.Arrays;
 
@@ -123,5 +126,10 @@ public class PoolLayer extends Layer {
 	@Override
 	public void assignGradientInto(Layer receiveGrad, int i, int j, int k, int batchIndex) {
 		// pool does not train
+	}
+
+	@Override
+	public WLayer webify() {
+		return new WPoolLayer(this.layerParam.inputSize, this.layerParam.outputSize, this.layerParam.stride, this.layerParam.poolSize, this.layerParam.poolType);
 	}
 }

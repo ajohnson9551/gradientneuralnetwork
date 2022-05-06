@@ -16,18 +16,18 @@ public class RunTrain {
 
 		long t0 = System.currentTimeMillis();
 
-		int cycles = 240000;
+		int cycles = 10;
 		double trainingRate = 10;
 		int stochasticBatchSize = 10;
 		int ram = 10;
-		double tolerance = 0.01;
+		double tolerance = 0.0;
 
 		List<LayerParameters> layerParams = new ArrayList<>(List.of(
-				new ConvolutionalLayerParameters(3, 4, 0, ActFunc.RELU),
+				new ConvolutionalLayerParameters(2, 3, 0, ActFunc.RELU),
 				new PoolLayerParameters(2, 2, PoolType.AVG),
-				new ConvolutionalLayerParameters(2, 4, 1, ActFunc.RELU),
-				new PoolLayerParameters(3, 3, PoolType.AVG),
-				new FullLayerParameters(100, ActFunc.SIGMOID),
+				new ConvolutionalLayerParameters(2, 3, 1, ActFunc.RELU),
+				new PoolLayerParameters(3, 2, PoolType.AVG),
+				new FullLayerParameters(150, ActFunc.SIGMOID),
 				new FullLayerParameters(10, ActFunc.SIGMOID)
 		));
 
@@ -35,7 +35,7 @@ public class RunTrain {
 		Network net = new ConvolutionalNetwork(netParams);
 
 		DigitRecognitionFitness trainFit = new DigitRecognitionFitness(true, 1.0, false, tolerance);
-		DigitRecognitionFitness testFit = new DigitRecognitionFitness(false, 1.0, true, 0.0);
+		DigitRecognitionFitness testFit = new DigitRecognitionFitness(false, 1.0, false, 0.0);
 
 		Trainer t = new Trainer(trainingRate, net, trainFit, stochasticBatchSize, ram);
 

@@ -2,6 +2,8 @@ package core.layer;
 
 import core.ActFuncs;
 import core.Utility;
+import core.web.WFullLayer;
+import core.web.WLayer;
 
 import java.util.Arrays;
 
@@ -145,5 +147,11 @@ public class FullLayer extends Layer {
 		}
 		Arrays.fill(this.lastX, null);
 		Arrays.fill(this.lastPrime, null);
+	}
+
+
+	@Override
+	public WLayer webify() {
+		return new WFullLayer(this.inputSize, this.outputSize, this.A, this.b, this.layerParam.actFunc);
 	}
 }

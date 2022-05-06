@@ -4,6 +4,8 @@ import com.aparapi.Kernel;
 import com.aparapi.Range;
 import core.layer.Layer;
 import core.layer.LayerParameters;
+import core.web.WLayer;
+import core.web.WNetwork;
 
 import java.util.Arrays;
 
@@ -156,5 +158,13 @@ public class ConvolutionalNetwork extends Network {
 			arr[i] = vol[i % vol.length][(i / vol.length) % vol[0].length][i / (vol.length * vol[0].length)];
 		}
 		return arr;
+	}
+
+	public WNetwork webify() {
+		WLayer[] wlayers = new WLayer[this.layers.length];
+		for (int i = 0; i < wlayers.length; i++) {
+			wlayers[i] = this.layers[i].webify();
+		}
+		return new WNetwork(wlayers);
 	}
 }

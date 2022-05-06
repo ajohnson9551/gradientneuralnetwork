@@ -1,5 +1,7 @@
 package core.network;
 
+import core.web.WNetwork;
+
 import java.io.*;
 
 public abstract class Network implements Serializable {
