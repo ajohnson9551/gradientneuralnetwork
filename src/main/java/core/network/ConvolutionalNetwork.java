@@ -15,6 +15,7 @@ public class ConvolutionalNetwork extends Network {
 	private final ConvolutionalNetworkParameters param;
 
 	private transient Layer[][] grads;
+	private transient Layer[][] lastGrads;
 
 	private transient int batchIndex;
 
@@ -107,6 +108,9 @@ public class ConvolutionalNetwork extends Network {
 				this.grads[l][r] = this.layers[l].zeroCopy();
 			}
 		}
+		if (this.lastGrads == null) {
+			this.lastGrads = this.grads;
+		}
 	}
 
 	public void computeBackProp(double[] ans, double[] eval, int batchIndex) {
@@ -123,11 +127,14 @@ public class ConvolutionalNetwork extends Network {
 	}
 
 	public void applyGrads(double trainingRate) {
-		for (int batchIndex = 0; batchIndex < this.grads.length; batchIndex++) {
-			for (int l = 0; l < this.layers.length; l++) {
-				this.layers[l].train(this.grads[l], trainingRate);
+		for (int l = 0; l < this.layers.length; l++) {
+			for (int r = 0; r < param.numOutputs; r++) {
+				this.grads[l][r].combineScale(lastGrads[l][r], param.momentum);
 			}
+			this.layers[l].train(this.grads[l], trainingRate);
 		}
+
+		this.lastGrads = this.grads;
 	}
 
 	@Override

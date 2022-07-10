@@ -9,8 +9,9 @@ public class ConvolutionalNetworkParameters extends NetworkParameters {
 
 	Layer[] layers;
 	int batchSize;
+	double momentum;
 
-	public ConvolutionalNetworkParameters(int[] inputSize, int numOutputs, List<LayerParameters> layerParams, int batchSize) {
+	public ConvolutionalNetworkParameters(int[] inputSize, int numOutputs, List<LayerParameters> layerParams, int batchSize, double momentum) {
 		super(inputSize[0] * inputSize[1] * inputSize[2], numOutputs);
 		this.layers = new Layer[layerParams.size()];
 
@@ -21,5 +22,6 @@ public class ConvolutionalNetworkParameters extends NetworkParameters {
 		}
 
 		this.batchSize = batchSize;
+		this.momentum = momentum;
 	}
 }

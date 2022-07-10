@@ -16,26 +16,29 @@ public class RunTrain {
 
 		long t0 = System.currentTimeMillis();
 
-		int cycles = 10;
-		double trainingRate = 10;
+		int cycles = 60000;
+		double trainingRate = 20;
 		int stochasticBatchSize = 10;
 		int ram = 10;
 		double tolerance = 0.0;
+		double momentum = 0.5;
 
 		List<LayerParameters> layerParams = new ArrayList<>(List.of(
 				new ConvolutionalLayerParameters(2, 3, 0, ActFunc.RELU),
 				new PoolLayerParameters(2, 2, PoolType.AVG),
 				new ConvolutionalLayerParameters(2, 3, 1, ActFunc.RELU),
 				new PoolLayerParameters(3, 2, PoolType.AVG),
-				new FullLayerParameters(150, ActFunc.SIGMOID),
+				new ConvolutionalLayerParameters(2, 3, 1, ActFunc.RELU),
+				new PoolLayerParameters(2, 2, PoolType.MAX),
+				new FullLayerParameters(120, ActFunc.SIGMOID),
 				new FullLayerParameters(10, ActFunc.SIGMOID)
 		));
 
-		ConvolutionalNetworkParameters netParams = new ConvolutionalNetworkParameters(new int[]{28, 28, 1}, 10, layerParams, stochasticBatchSize);
+		ConvolutionalNetworkParameters netParams = new ConvolutionalNetworkParameters(new int[]{28, 28, 1}, 10, layerParams, stochasticBatchSize, momentum);
 		Network net = new ConvolutionalNetwork(netParams);
 
 		DigitRecognitionFitness trainFit = new DigitRecognitionFitness(true, 1.0, false, tolerance);
-		DigitRecognitionFitness testFit = new DigitRecognitionFitness(false, 1.0, false, 0.0);
+		DigitRecognitionFitness testFit = new DigitRecognitionFitness(false, 1.0, true, 0.0);
 
 		Trainer t = new Trainer(trainingRate, net, trainFit, stochasticBatchSize, ram);
 
